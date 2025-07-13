@@ -1,0 +1,33 @@
+Add a property to session object to mark which user is logged in
+
+req.session.userID = user.id
+
+{userID: 1} => send that to redis
+
+1.
+sess: qwqweqweqv -> {userID:1}
+
+2.
+express-session will set a cookie on m browser -> eqrtqtgnqreo19393443css
+
+3.
+when user makes a request 
+eqrtqtgnqreo19393443css ->  send to the server 
+
+4.
+decrypt the cookie
+eqrtqtgnqreo19393443css -> sess:qwqweqweqv
+
+5.
+make a request to redis
+sess:qwqweqweqv -> {userID:1}
+
+req.session = {userID: 1}
+
+---------------------------------------------------------------
+DockerFile contains instruction to build our own little computer
+tell what to install and put inside our computer 
+
+Docker cache each layer of command
+
+every line is a cache keys nad if not change since last build, cache the result

@@ -2,7 +2,6 @@ import { TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
 import { Flex, Spinner } from '@chakra-ui/react';
 import React from 'react';
 import {
-	Post,
 	PostFragment,
 	useVoteMutation,
 	VoteMutation,
@@ -10,18 +9,7 @@ import {
 import { ApolloCache, gql } from '@apollo/client';
 
 type VoteProps = {
-	// point: number;
-	// post: PostsQuery['posts']['posts'][0]
 	post: PostFragment;
-};
-
-const hoverIcon = (nev: boolean) => {
-	return {
-		color: 'white',
-		backgroundColor: nev ? 'green' : 'red',
-		borderRadius: '2rem',
-		padding: '0.2rem',
-	};
 };
 
 const updateAfterVote = (
@@ -29,7 +17,11 @@ const updateAfterVote = (
 	postId: number,
 	cache: ApolloCache<VoteMutation>
 ) => {
-	const data = cache.readFragment<Post>({
+	const data = cache.readFragment<{
+		id: number;
+		points: number;
+		voteStatus: number | null;
+	}>({
 		id: 'Post:' + postId,
 		fragment: gql`
 			fragment _ on Post {
@@ -39,84 +31,96 @@ const updateAfterVote = (
 			}
 		`,
 	});
-	console.log('data: ', data?.points);
 
-	if (data) {
-		if (data.voteStatus === value) {
-			return;
-		}
+	if (!data) return;
 
-		const newPoints =
-			(data.points as number) + (!data.voteStatus ? 1 : 2) * value;
-		cache.writeFragment({
-			id: 'Post:' + postId,
-			fragment: gql`
-				fragment __ on Post {
-					points
-					voteStatus
-				}
-			`,
-			data: { points: newPoints, voteStatus: value },
-		});
+	let newPoints = data.points;
+	let newVoteStatus = data.voteStatus;
+
+	if (data.voteStatus === value) {
+		// Undo vote
+		newPoints -= value;
+		newVoteStatus = null;
+	} else if (data.voteStatus === null) {
+		// New vote
+		newPoints += value;
+		newVoteStatus = value;
+	} else {
+		// Switching vote
+		newPoints += 2 * value;
+		newVoteStatus = value;
 	}
+
+	cache.writeFragment({
+		id: 'Post:' + postId,
+		fragment: gql`
+			fragment __ on Post {
+				points
+				voteStatus
+			}
+		`,
+		data: {
+			points: newPoints,
+			voteStatus: newVoteStatus,
+		},
+	});
 };
 
 export function Vote({ post }: VoteProps) {
 	const [loadingState, setLoadingState] = React.useState<
-		'updoot-loading' | 'downdoot-loading' | 'not-loading'
+		'upvote-loading' | 'downvote-loading' | 'not-loading'
 	>('not-loading');
+
 	const [vote] = useVoteMutation();
 
-	const upVote = React.useCallback(async () => {
-		setLoadingState('updoot-loading');
-		await vote({
-			variables: {
-				postID: post.id,
-				value: 1,
-			},
-			update: (cache) => updateAfterVote(1, post.id, cache),
-		}),
-			setLoadingState('not-loading');
-	}, [vote]);
-
-	const downVote = React.useCallback(async () => {
-		setLoadingState('downdoot-loading');
-		await vote({
-			variables: {
-				postID: post.id,
-				value: -1,
-			},
-			update: (cache) => updateAfterVote(-1, post.id, cache),
-		});
+	const handleVote = async (value: 1 | -1) => {
+		const voteType = value === 1 ? 'upvote-loading' : 'downvote-loading';
+		setLoadingState(voteType);
+		try {
+			await vote({
+				variables: {
+					postID: post.id,
+					value,
+				},
+				update: (cache) => updateAfterVote(value, post.id, cache),
+			});
+		} catch (error) {
+			console.error('Vote error:', error);
+		}
 		setLoadingState('not-loading');
-	}, [vote]);
+	};
 
 	return (
-		<Flex direction='column' justifyContent='center' alignItems='center' mr={7}>
-			{loadingState === 'updoot-loading' ? (
+		<Flex direction='column' alignItems='center' mr={7}>
+			{loadingState === 'upvote-loading' ? (
 				<Spinner size='sm' />
 			) : (
 				<TriangleUpIcon
-					_hover={hoverIcon(true)}
-					area-label='updoot post'
-					onClick={upVote}
+					aria-label='upvote post'
+					onClick={() => handleVote(1)}
 					boxSize={5}
-					color='green'
-					// _disabled={post.voteStatus === 1 ? 'true' : ''}
-					// bgColor='green'
+					cursor='pointer'
+					color={post.voteStatus === 1 ? 'green.400' : 'gray.400'}
+					_hover={{
+						backgroundColor: 'green.100',
+						borderRadius: 'full',
+					}}
 				/>
 			)}
-			{post.points}
-			{loadingState === 'downdoot-loading' ? (
+			<strong>{post.points}</strong>
+			{loadingState === 'downvote-loading' ? (
 				<Spinner size='sm' />
 			) : (
 				<TriangleDownIcon
-					_hover={hoverIcon(false)}
-					area-label='downdoot post'
-					onClick={downVote}
+					aria-label='downvote post'
+					onClick={() => handleVote(-1)}
 					boxSize={5}
-					color='red'
-					// _disabled={post.voteStatus === -1 ? 'true' : ''}
+					cursor='pointer'
+					color={post.voteStatus === -1 ? 'red.400' : 'gray.400'}
+					_hover={{
+						backgroundColor: 'red.100',
+						borderRadius: 'full',
+					}}
 				/>
 			)}
 		</Flex>

@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { COOKIE_NAME, __production__ } from './constants';
+import { COOKIE_NAME, __production__ } from './utils/constants';
 import express, { Application } from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
@@ -10,16 +10,16 @@ import cors from 'cors';
 import RedisStore from "connect-redis";
 import session from "express-session";
 import Redis from "ioredis";
-import { AppDataSource } from './typeorm_config';
+import { AppDataSource } from './db/typeorm_config';
 import { createUserLoader } from './utils/createUserLoader';
 import { createUpdootLoader } from './utils/createUpdootLoader';
+import { connectKafka, kafkaProducer } from './kafka/kafka';
+import { runKafkaConsumers } from './kafka/consumers/runKafkaConsumers';
+import { AuditLogResolver } from './resolvers/audit_log';
 
 
 const main = async () => {
-	await AppDataSource.initialize()
-		.then(() => {
-			// console.log(AppDataSource.entityMetadatasMap);
-		}).catch((error) => console.log(error));
+	await AppDataSource.initialize().catch((error) => console.log('Database connection failed: ', error));
 
 	const redis = new Redis(process.env.REDIS_URL!);
 	let redisStore = new RedisStore({
@@ -29,6 +29,21 @@ const main = async () => {
 
 	const app: Application = express();
 	const port = parseInt(process.env.PORT!) || 4000;
+
+	//* Kafka connection
+	try {
+		await connectKafka();
+		await kafkaProducer.send({
+			topic: 'my-topic',
+			messages: [{ value: 'Server started successfully' }],
+		});
+
+		await runKafkaConsumers();
+		console.log('✅ Kafka connected and consumers started');
+	} catch (err) {
+		console.error('❌ Kafka connection failed:', err);
+	}
+
 
 	const allowedOrigins = [
 		process.env.CORS_ORIGIN,
@@ -68,15 +83,9 @@ const main = async () => {
 	}));
 
 
-	// app.use((req, _, next) => {
-	// 	console.log('Session:', req.session);
-	// 	next();
-	// });
-
-
 	const apolloServer = new ApolloServer({
 		schema: await buildSchema({
-			resolvers: [PostResolver, UserResolver],
+			resolvers: [PostResolver, UserResolver, AuditLogResolver],
 			validate: false,
 		}),
 		context: ({ req, res }: MyContext) => ({

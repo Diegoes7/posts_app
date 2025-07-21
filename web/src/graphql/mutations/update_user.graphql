@@ -1,0 +1,15 @@
+# Delete User Mutation
+mutation DeleteUser {
+	deleteUser
+}
+
+# Update User Mutation
+mutation UpdateUser($data: UpdateUserInput!) {
+	updateUser(data: $data) {
+		id
+		username
+		email
+		# ratingPts
+		updatedAt
+	}
+}

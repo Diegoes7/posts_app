@@ -12,11 +12,14 @@ import {
 	Stack,
 	Heading,
 	Button,
+	Tooltip,
 } from '@chakra-ui/react';
 import React from 'react';
 import { Card } from '../components/card_post';
 // import AvatarUploader from '../components/avatar';
 import { withApollo } from '../utils/withApollo';
+import { AddIcon } from '@chakra-ui/icons';
+import { PostSearchPanel } from '../components/search_panel';
 
 const Index = () => {
 	const { data: user } = useMeQuery();
@@ -49,23 +52,6 @@ const Index = () => {
 				limit: variables!.limit,
 				cursor: cursor1,
 			},
-			// updateQuery: (previousValue, { fetchMoreResult }): PostsQuery => {
-			// 	if (!fetchMoreResult) {
-			// 		return previousValue;
-			// 	}
-
-			// 	return {
-			// 		__typename: 'Query',
-			// 		posts: {
-			// 			__typename: 'PaginatedPosts',
-			// 			hasMore: fetchMoreResult.posts.hasMore,
-			// 			posts: [
-			// 				...previousValue.posts.posts,
-			// 				...fetchMoreResult.posts.posts,
-			// 			],
-			// 		},
-			// 	};
-			// },
 		});
 	}
 
@@ -79,35 +65,51 @@ const Index = () => {
 			>
 				<Heading>Posts</Heading>
 				<NextLink href='/create_post'>
-					<Button as={ChakraLink} colorScheme='teal'>
-						Create Post
-					</Button>
+					<Tooltip fontSize='small' label='Make a new post'>
+						<Button as={ChakraLink} colorScheme='teal' leftIcon={<AddIcon />}>
+							Create Post
+						</Button>
+					</Tooltip>
 				</NextLink>
 			</Flex>
 			<br />
 			{!data && loading ? (
 				<Stack>Loading...</Stack>
 			) : (
-				RenderPosts(data!.posts.posts, userID)
+				<Stack>
+					<PostSearchPanel />
+					{/* <RenderPosts posts={data!.posts.posts} userID={userID} /> */}
+				</Stack>
 			)}
 			{data && data.posts.hasMore ? (
 				<Flex justifyContent='flex-end'>
-					<Button onClick={handlePagination} isLoading={loading} mb='6'>
-						Load more
-					</Button>
+					<Tooltip fontSize='small' label='Get more posts'>
+						<Button onClick={handlePagination} isLoading={loading} mb='6'>
+							Load more...
+						</Button>
+					</Tooltip>
 				</Flex>
 			) : null}
 		</Layout>
 	);
 };
 
-function RenderPosts(posts: Post[], userID: number | undefined) {
+
+//* Old way to show posts, new way is through the search panel component
+type RenderPostsProps = {
+	posts: Post[];
+	userID: number | undefined;
+};
+
+function RenderPosts({ posts, userID }: RenderPostsProps) {
 	return (
 		<Stack mb='4'>
 			<Stack spacing={8}>
 				{posts
-					// .filter((p) => p.creatorId === userID)
-					.map((p) => (!p ? null : <Card key={p.id} {...p} />))}
+					// .filter((p) => p.creatorId === userID) //! can make button to show only you posts ot search by string
+					.map((p) =>
+						!p ? null : <Card key={p.id} post={p} variant='preview' />
+					)}
 			</Stack>
 			{!userID && 'Have no user'}
 		</Stack>

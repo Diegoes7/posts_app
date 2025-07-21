@@ -8,6 +8,7 @@ import Layout from '../components/Layout';
 import { useIsAuth } from '../utils/useIsAuth';
 import TextareaField from '../components/textArea';
 import { withApollo } from '../utils/withApollo';
+import { AddIcon } from '@chakra-ui/icons';
 
 function CreatePost() {
 	const router = useRouter();
@@ -25,8 +26,8 @@ function CreatePost() {
 							input: values,
 						},
 						update: (cache) => {
-							cache.evict({fieldName: "posts:{}"})
-						}
+							cache.evict({ fieldName: 'posts:{}' });
+						},
 					});
 					if (!response.errors) {
 						router.push('/');
@@ -49,7 +50,8 @@ function CreatePost() {
 							type='submit'
 							isLoading={isSubmitting}
 							colorScheme='teal'
-								sx={{ alignSelf: 'flex-end' }}
+							sx={{ alignSelf: 'flex-end' }}
+							leftIcon={<AddIcon />}
 						>
 							Create Post
 						</Button>

@@ -3,11 +3,16 @@ import { Form, Formik } from 'formik';
 import Wrapper from '../../components/wrapper';
 import { toErrorMap } from '../../utils/toErrorMap';
 import InputField from '../../components/inputField';
-import { Box, Button, Flex, Link } from '@chakra-ui/react';
-import { MeDocument, MeQuery, useChangePasswordMutation } from '../../generated/graphql';
+import { Box, Button, Flex, Link, Tooltip } from '@chakra-ui/react';
+import {
+	MeDocument,
+	MeQuery,
+	useChangePasswordMutation,
+} from '../../generated/graphql';
 import { useRouter } from 'next/router';
 import NextLink from 'next/link';
 import { withApollo } from '../../utils/withApollo';
+import { EditIcon } from '@chakra-ui/icons';
 
 const ChangePassword = () => {
 	const router = useRouter();
@@ -36,7 +41,7 @@ const ChangePassword = () => {
 										me: data?.changePassword.user,
 									},
 								});
-								cache.evict({ fieldName: 'post:{}' })
+								cache.evict({ fieldName: 'post:{}' });
 							},
 						});
 						if (response.data?.changePassword.errors) {
@@ -51,7 +56,7 @@ const ChangePassword = () => {
 						}
 					}}
 				>
-					{({ values, handleChange, isSubmitting }) => (
+					{({ isSubmitting }) => (
 						<Form>
 							<InputField
 								label='New Password'
@@ -69,14 +74,17 @@ const ChangePassword = () => {
 									</NextLink>
 								</Flex>
 							)}
-							<Button
-								mt='4'
-								type='submit'
-								isLoading={isSubmitting}
-								colorScheme='teal'
-							>
-								Change Password
-							</Button>
+							<Tooltip fontSize='small' label='Type your new password'>
+								<Button
+									mt='4'
+									type='submit'
+									isLoading={isSubmitting}
+									colorScheme='teal'
+									leftIcon={<EditIcon />}
+								>
+									Change Password
+								</Button>
+							</Tooltip>
 						</Form>
 					)}
 				</Formik>

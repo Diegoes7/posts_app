@@ -15,6 +15,18 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  JSONObject: { input: any; output: any; }
+};
+
+export type AuditLog = {
+  __typename?: 'AuditLog';
+  actorId?: Maybe<Scalars['Float']['output']>;
+  createdAt: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  event: Scalars['String']['output'];
+  id: Scalars['Float']['output'];
+  payload?: Maybe<Scalars['JSONObject']['output']>;
+  timestamp: Scalars['String']['output'];
 };
 
 export type FieldError = {
@@ -23,16 +35,24 @@ export type FieldError = {
   message: Scalars['String']['output'];
 };
 
+export type ForgotPasswordResponse = {
+  __typename?: 'ForgotPasswordResponse';
+  previewUrl?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: UserResponse;
   createPost: Post;
   deletePost: Scalars['Boolean']['output'];
-  forgotPassword: Scalars['Boolean']['output'];
+  deleteUser: Scalars['Boolean']['output'];
+  forgotPassword: ForgotPasswordResponse;
   login: UserResponse;
   logout: Scalars['Boolean']['output'];
   register: UserResponse;
   updatePost?: Maybe<Post>;
+  updateUser?: Maybe<User>;
   vote: Scalars['Boolean']['output'];
 };
 
@@ -76,6 +96,11 @@ export type MutationUpdatePostArgs = {
 };
 
 
+export type MutationUpdateUserArgs = {
+  data: UpdateUserInput;
+};
+
+
 export type MutationVoteArgs = {
   postID: Scalars['Int']['input'];
   value: Scalars['Int']['input'];
@@ -94,6 +119,7 @@ export type Post = {
   creatorId: Scalars['Float']['output'];
   id: Scalars['Float']['output'];
   points: Scalars['Float']['output'];
+  popularityPts: Scalars['Float']['output'];
   text: Scalars['String']['output'];
   textSnippet?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
@@ -108,9 +134,22 @@ export type PostInput = {
 
 export type Query = {
   __typename?: 'Query';
+  auditLogs: Array<AuditLog>;
+  auditLogsByEvent: Array<AuditLog>;
+  auditLogsByUser: Array<AuditLog>;
   me?: Maybe<User>;
   post?: Maybe<Post>;
   posts: PaginatedPosts;
+};
+
+
+export type QueryAuditLogsByEventArgs = {
+  event: Scalars['String']['input'];
+};
+
+
+export type QueryAuditLogsByUserArgs = {
+  userId: Scalars['Int']['input'];
 };
 
 
@@ -120,8 +159,16 @@ export type QueryPostArgs = {
 
 
 export type QueryPostsArgs = {
+  creatorId?: InputMaybe<Scalars['Int']['input']>;
   cursor?: InputMaybe<Scalars['String']['input']>;
   limit: Scalars['Int']['input'];
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateUserInput = {
+  email?: InputMaybe<Scalars['String']['input']>;
+  ratingPts?: InputMaybe<Scalars['Int']['input']>;
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type User = {
@@ -129,6 +176,7 @@ export type User = {
   createdAt: Scalars['String']['output'];
   email: Scalars['String']['output'];
   id: Scalars['Float']['output'];
+  ratingPts?: Maybe<Scalars['Int']['output']>;
   updatedAt: Scalars['String']['output'];
   username: Scalars['String']['output'];
 };
@@ -145,7 +193,7 @@ export type UsernamePasswordInput = {
   username: Scalars['String']['input'];
 };
 
-export type PostFragment = { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null };
+export type PostFragment = { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null };
 
 export type RegularErrorFragment = { __typename?: 'FieldError', field: string, message: string };
 
@@ -166,7 +214,7 @@ export type CreatePostMutationVariables = Exact<{
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } };
 
 export type DeletePostMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -180,7 +228,7 @@ export type ForgotPasswordMutationVariables = Exact<{
 }>;
 
 
-export type ForgotPasswordMutation = { __typename?: 'Mutation', forgotPassword: boolean };
+export type ForgotPasswordMutation = { __typename?: 'Mutation', forgotPassword: { __typename?: 'ForgotPasswordResponse', success: boolean, previewUrl?: string | null } };
 
 export type LoginMutationVariables = Exact<{
   usernameOrEmail: Scalars['String']['input'];
@@ -209,7 +257,19 @@ export type UpdatePostMutationVariables = Exact<{
 }>;
 
 
-export type UpdatePostMutation = { __typename?: 'Mutation', updatePost?: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } | null };
+export type UpdatePostMutation = { __typename?: 'Mutation', updatePost?: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } | null };
+
+export type DeleteUserMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: boolean };
+
+export type UpdateUserMutationVariables = Exact<{
+  data: UpdateUserInput;
+}>;
+
+
+export type UpdateUserMutation = { __typename?: 'Mutation', updateUser?: { __typename?: 'User', id: number, username: string, email: string, updatedAt: string } | null };
 
 export type VoteMutationVariables = Exact<{
   value: Scalars['Int']['input'];
@@ -218,6 +278,25 @@ export type VoteMutationVariables = Exact<{
 
 
 export type VoteMutation = { __typename?: 'Mutation', vote: boolean };
+
+export type AuditLogsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AuditLogsQuery = { __typename?: 'Query', auditLogs: Array<{ __typename?: 'AuditLog', id: number, event: string, description: string, actorId?: number | null, timestamp: string, payload?: any | null }> };
+
+export type AuditLogsByUserQueryVariables = Exact<{
+  userId: Scalars['Int']['input'];
+}>;
+
+
+export type AuditLogsByUserQuery = { __typename?: 'Query', auditLogsByUser: Array<{ __typename?: 'AuditLog', id: number, event: string, description: string, timestamp: string, payload?: any | null }> };
+
+export type AuditLogsByEventQueryVariables = Exact<{
+  event: Scalars['String']['input'];
+}>;
+
+
+export type AuditLogsByEventQuery = { __typename?: 'Query', auditLogsByEvent: Array<{ __typename?: 'AuditLog', id: number, event: string, description: string, actorId?: number | null, timestamp: string, payload?: any | null }> };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -229,15 +308,17 @@ export type PostQueryVariables = Exact<{
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } | null };
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } | null };
 
 export type PostsQueryVariables = Exact<{
   limit: Scalars['Int']['input'];
   cursor?: InputMaybe<Scalars['String']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  creatorId?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null }> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null }> } };
 
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
@@ -262,6 +343,7 @@ export const PostFragmentDoc = gql`
   creator {
     ...RegularUser
   }
+  popularityPts
 }
     ${RegularUserFragmentDoc}`;
 export const RegularErrorFragmentDoc = gql`
@@ -381,7 +463,10 @@ export type DeletePostMutationResult = Apollo.MutationResult<DeletePostMutation>
 export type DeletePostMutationOptions = Apollo.BaseMutationOptions<DeletePostMutation, DeletePostMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation forgotPassword($email: String!) {
-  forgotPassword(email: $email)
+  forgotPassword(email: $email) {
+    success
+    previewUrl
+  }
 }
     `;
 export type ForgotPasswordMutationFn = Apollo.MutationFunction<ForgotPasswordMutation, ForgotPasswordMutationVariables>;
@@ -542,6 +627,72 @@ export function useUpdatePostMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UpdatePostMutationHookResult = ReturnType<typeof useUpdatePostMutation>;
 export type UpdatePostMutationResult = Apollo.MutationResult<UpdatePostMutation>;
 export type UpdatePostMutationOptions = Apollo.BaseMutationOptions<UpdatePostMutation, UpdatePostMutationVariables>;
+export const DeleteUserDocument = gql`
+    mutation DeleteUser {
+  deleteUser
+}
+    `;
+export type DeleteUserMutationFn = Apollo.MutationFunction<DeleteUserMutation, DeleteUserMutationVariables>;
+
+/**
+ * __useDeleteUserMutation__
+ *
+ * To run a mutation, you first call `useDeleteUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteUserMutation, { data, loading, error }] = useDeleteUserMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useDeleteUserMutation(baseOptions?: Apollo.MutationHookOptions<DeleteUserMutation, DeleteUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteUserMutation, DeleteUserMutationVariables>(DeleteUserDocument, options);
+      }
+export type DeleteUserMutationHookResult = ReturnType<typeof useDeleteUserMutation>;
+export type DeleteUserMutationResult = Apollo.MutationResult<DeleteUserMutation>;
+export type DeleteUserMutationOptions = Apollo.BaseMutationOptions<DeleteUserMutation, DeleteUserMutationVariables>;
+export const UpdateUserDocument = gql`
+    mutation UpdateUser($data: UpdateUserInput!) {
+  updateUser(data: $data) {
+    id
+    username
+    email
+    updatedAt
+  }
+}
+    `;
+export type UpdateUserMutationFn = Apollo.MutationFunction<UpdateUserMutation, UpdateUserMutationVariables>;
+
+/**
+ * __useUpdateUserMutation__
+ *
+ * To run a mutation, you first call `useUpdateUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateUserMutation, { data, loading, error }] = useUpdateUserMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useUpdateUserMutation(baseOptions?: Apollo.MutationHookOptions<UpdateUserMutation, UpdateUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateUserMutation, UpdateUserMutationVariables>(UpdateUserDocument, options);
+      }
+export type UpdateUserMutationHookResult = ReturnType<typeof useUpdateUserMutation>;
+export type UpdateUserMutationResult = Apollo.MutationResult<UpdateUserMutation>;
+export type UpdateUserMutationOptions = Apollo.BaseMutationOptions<UpdateUserMutation, UpdateUserMutationVariables>;
 export const VoteDocument = gql`
     mutation Vote($value: Int!, $postID: Int!) {
   vote(value: $value, postID: $postID)
@@ -574,6 +725,139 @@ export function useVoteMutation(baseOptions?: Apollo.MutationHookOptions<VoteMut
 export type VoteMutationHookResult = ReturnType<typeof useVoteMutation>;
 export type VoteMutationResult = Apollo.MutationResult<VoteMutation>;
 export type VoteMutationOptions = Apollo.BaseMutationOptions<VoteMutation, VoteMutationVariables>;
+export const AuditLogsDocument = gql`
+    query AuditLogs {
+  auditLogs {
+    id
+    event
+    description
+    actorId
+    timestamp
+    payload
+  }
+}
+    `;
+
+/**
+ * __useAuditLogsQuery__
+ *
+ * To run a query within a React component, call `useAuditLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAuditLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAuditLogsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAuditLogsQuery(baseOptions?: Apollo.QueryHookOptions<AuditLogsQuery, AuditLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AuditLogsQuery, AuditLogsQueryVariables>(AuditLogsDocument, options);
+      }
+export function useAuditLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AuditLogsQuery, AuditLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AuditLogsQuery, AuditLogsQueryVariables>(AuditLogsDocument, options);
+        }
+export function useAuditLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AuditLogsQuery, AuditLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AuditLogsQuery, AuditLogsQueryVariables>(AuditLogsDocument, options);
+        }
+export type AuditLogsQueryHookResult = ReturnType<typeof useAuditLogsQuery>;
+export type AuditLogsLazyQueryHookResult = ReturnType<typeof useAuditLogsLazyQuery>;
+export type AuditLogsSuspenseQueryHookResult = ReturnType<typeof useAuditLogsSuspenseQuery>;
+export type AuditLogsQueryResult = Apollo.QueryResult<AuditLogsQuery, AuditLogsQueryVariables>;
+export const AuditLogsByUserDocument = gql`
+    query AuditLogsByUser($userId: Int!) {
+  auditLogsByUser(userId: $userId) {
+    id
+    event
+    description
+    timestamp
+    payload
+  }
+}
+    `;
+
+/**
+ * __useAuditLogsByUserQuery__
+ *
+ * To run a query within a React component, call `useAuditLogsByUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAuditLogsByUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAuditLogsByUserQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useAuditLogsByUserQuery(baseOptions: Apollo.QueryHookOptions<AuditLogsByUserQuery, AuditLogsByUserQueryVariables> & ({ variables: AuditLogsByUserQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AuditLogsByUserQuery, AuditLogsByUserQueryVariables>(AuditLogsByUserDocument, options);
+      }
+export function useAuditLogsByUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AuditLogsByUserQuery, AuditLogsByUserQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AuditLogsByUserQuery, AuditLogsByUserQueryVariables>(AuditLogsByUserDocument, options);
+        }
+export function useAuditLogsByUserSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AuditLogsByUserQuery, AuditLogsByUserQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AuditLogsByUserQuery, AuditLogsByUserQueryVariables>(AuditLogsByUserDocument, options);
+        }
+export type AuditLogsByUserQueryHookResult = ReturnType<typeof useAuditLogsByUserQuery>;
+export type AuditLogsByUserLazyQueryHookResult = ReturnType<typeof useAuditLogsByUserLazyQuery>;
+export type AuditLogsByUserSuspenseQueryHookResult = ReturnType<typeof useAuditLogsByUserSuspenseQuery>;
+export type AuditLogsByUserQueryResult = Apollo.QueryResult<AuditLogsByUserQuery, AuditLogsByUserQueryVariables>;
+export const AuditLogsByEventDocument = gql`
+    query AuditLogsByEvent($event: String!) {
+  auditLogsByEvent(event: $event) {
+    id
+    event
+    description
+    actorId
+    timestamp
+    payload
+  }
+}
+    `;
+
+/**
+ * __useAuditLogsByEventQuery__
+ *
+ * To run a query within a React component, call `useAuditLogsByEventQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAuditLogsByEventQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAuditLogsByEventQuery({
+ *   variables: {
+ *      event: // value for 'event'
+ *   },
+ * });
+ */
+export function useAuditLogsByEventQuery(baseOptions: Apollo.QueryHookOptions<AuditLogsByEventQuery, AuditLogsByEventQueryVariables> & ({ variables: AuditLogsByEventQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AuditLogsByEventQuery, AuditLogsByEventQueryVariables>(AuditLogsByEventDocument, options);
+      }
+export function useAuditLogsByEventLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AuditLogsByEventQuery, AuditLogsByEventQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AuditLogsByEventQuery, AuditLogsByEventQueryVariables>(AuditLogsByEventDocument, options);
+        }
+export function useAuditLogsByEventSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AuditLogsByEventQuery, AuditLogsByEventQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AuditLogsByEventQuery, AuditLogsByEventQueryVariables>(AuditLogsByEventDocument, options);
+        }
+export type AuditLogsByEventQueryHookResult = ReturnType<typeof useAuditLogsByEventQuery>;
+export type AuditLogsByEventLazyQueryHookResult = ReturnType<typeof useAuditLogsByEventLazyQuery>;
+export type AuditLogsByEventSuspenseQueryHookResult = ReturnType<typeof useAuditLogsByEventSuspenseQuery>;
+export type AuditLogsByEventQueryResult = Apollo.QueryResult<AuditLogsByEventQuery, AuditLogsByEventQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -654,8 +938,8 @@ export type PostLazyQueryHookResult = ReturnType<typeof usePostLazyQuery>;
 export type PostSuspenseQueryHookResult = ReturnType<typeof usePostSuspenseQuery>;
 export type PostQueryResult = Apollo.QueryResult<PostQuery, PostQueryVariables>;
 export const PostsDocument = gql`
-    query Posts($limit: Int!, $cursor: String) {
-  posts(limit: $limit, cursor: $cursor) {
+    query Posts($limit: Int!, $cursor: String, $search: String, $creatorId: Int) {
+  posts(limit: $limit, cursor: $cursor, search: $search, creatorId: $creatorId) {
     hasMore
     posts {
       ...Post
@@ -678,6 +962,8 @@ export const PostsDocument = gql`
  *   variables: {
  *      limit: // value for 'limit'
  *      cursor: // value for 'cursor'
+ *      search: // value for 'search'
+ *      creatorId: // value for 'creatorId'
  *   },
  * });
  */

@@ -32,7 +32,7 @@ function Post() {
 
 	return (
 		<Layout variant='regular'>
-			<Card {...data.post} />
+			<Card post={data.post} variant='full' />
 		</Layout>
 	);
 }

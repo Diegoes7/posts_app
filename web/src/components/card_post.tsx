@@ -1,3 +1,135 @@
+// import {
+// 	Box,
+// 	Flex,
+// 	Heading,
+// 	Link,
+// 	Stack,
+// 	Text,
+// 	Tooltip,
+// } from '@chakra-ui/react';
+// import { useDeletePostMutation, useMeQuery, User } from '../generated/graphql';
+// import { capitalizeFirstLetter } from '../utils/firstLetterCapitalized';
+// import { Vote } from './vote';
+// import NextLink from 'next/link';
+// import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
+// import React from 'react';
+
+// type CardModel = {
+// 	createdAt: string;
+// 	creator?: User | null;
+// 	creatorId: number;
+// 	id: number;
+// 	points: number;
+// 	text: string;
+// 	textSnippet?: string | null;
+// 	title: string;
+// 	updatedAt: string;
+// 	voteStatus?: number | null;
+// 	popularityPts: number;
+// };
+
+// export function Card(post: CardModel) {
+// 	const { data } = useMeQuery();
+// 	const userID = data?.me?.id;
+// 	const [deletePost] = useDeletePostMutation();
+
+// 	const handleDeletePost = React.useCallback(async () => {
+// 		if (
+// 			confirm(
+// 				'Are you sure you want to delete this post? This cannot be undone.'
+// 			)
+// 		) {
+// 			await deletePost({
+// 				variables: {
+// 					id: post.id,
+// 				},
+// 				update: (cache) => {
+// 					cache.evict({ id: 'Post:' + post.id });
+// 					cache.gc(); //* Optional: garbage collect evicted items
+// 				},
+// 			});
+// 		}
+// 	}, [post.id, deletePost]);
+
+// 	return (
+// 		<Box key={post.id} p={5} borderRadius={10} shadow='md' borderWidth='1px'>
+// 			<Flex>
+// 				<Vote post={post} />
+// 				<Stack flex={1} w='80%'>
+// 					<NextLink href='/post/[id]' as={`/post/${post.id}`}>
+// 						<Link>
+// 							<Heading fontSize='xl'>
+// 								{post.title} {<ArrowForwardIcon />}
+// 							</Heading>
+// 						</Link>
+// 					</NextLink>
+// 					<Text
+// 						mt={4}
+// 						style={{
+// 							whiteSpace: 'nowrap',
+// 							overflow: 'hidden',
+// 							textOverflow: 'ellipsis',
+// 							width: '85%',
+// 						}}
+// 					>
+// 						<span
+// 							style={{
+// 								marginRight: '0.2em',
+// 							}}
+// 						>
+// 							Content:{' '}
+// 						</span>
+// 						{post.textSnippet}
+// 						{post.textSnippet && post.textSnippet?.length < 50 ? '' : '...'}
+// 					</Text>
+// 					<Text mt={4}>
+// 						<span style={{ marginRight: '0.2em' }}>Likes: </span>
+// 						{post.points}
+// 					</Text>
+// 					<Text mt={4}>
+// 						<span style={{ marginRight: '0.2em' }}>Author: </span>
+// 						{post.creator && capitalizeFirstLetter(post.creator?.username)}
+// 					</Text>
+// 				</Stack>
+// 				{userID !== post.creatorId ? null : (
+// 					<NextLink href='/post/edit/[id]' as={`/post/edit/${post.id}`}>
+// 						<Tooltip fontSize='small' label='Edit post'>
+// 							<EditIcon
+// 								boxSize={'21'}
+// 								aria-label='Edit post'
+// 								_hover={{
+// 									backgroundColor: 'green',
+// 									color: 'white',
+// 									padding: '0.2rem',
+// 									borderRadius: '0.3rem',
+// 								}}
+// 							/>
+// 						</Tooltip>
+// 					</NextLink>
+// 				)}
+// 			</Flex>
+// 			{userID !== post.creatorId ? null : (
+// 				<Flex justifyContent={'flex-end'}>
+// 					<Tooltip fontSize='small' label='Delete'>
+// 						<DeleteIcon
+// 							color={'#ca244c'}
+// 							boxSize={'21'}
+// 							aria-label='Delete Post'
+// 							_hover={{
+// 								backgroundColor: '#ca244c',
+// 								color: 'white',
+// 								padding: '0.2rem',
+// 								borderRadius: '0.3rem',
+// 							}}
+// 							onClick={handleDeletePost}
+// 						/>
+// 					</Tooltip>
+// 				</Flex>
+// 			)}
+// 		</Box>
+// 	);
+// }
+
 import {
 	Box,
 	Flex,
@@ -7,86 +139,103 @@ import {
 	Text,
 	Tooltip,
 } from '@chakra-ui/react';
-import { useDeletePostMutation, useMeQuery, User } from '../generated/graphql';
+import { useMeQuery, useDeletePostMutation, User } from '../generated/graphql';
 import { capitalizeFirstLetter } from '../utils/firstLetterCapitalized';
 import { Vote } from './vote';
 import NextLink from 'next/link';
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { ArrowForwardIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import React from 'react';
 
-type CardModel = {
-	createdAt: string;
-	creator?: User | null;
-	creatorId: number;
-	id: number;
-	points: number;
-	text: string;
-	textSnippet?: string | null;
-	title: string;
-	updatedAt: string;
-	voteStatus?: number | null;
+type PostCardProps = {
+	post: {
+		createdAt: string;
+		creator?: User | null;
+		creatorId: number;
+		id: number;
+		points: number;
+		text: string;
+		textSnippet?: string | null;
+		title: string;
+		updatedAt: string;
+		voteStatus?: number | null;
+		popularityPts: number;
+	};
+	variant?: 'preview' | 'full';
 };
 
-export function Card(post: CardModel) {
+export function Card({ post, variant = 'preview' }: PostCardProps) {
 	const { data } = useMeQuery();
 	const userID = data?.me?.id;
 	const [deletePost] = useDeletePostMutation();
 
-	const deletePost1 = React.useCallback(async () => {
-		//! need to show some dialog to pop up
-		await deletePost({
-			variables: {
-				id: post.id,
-			},
-			update: (cache) => {
-				cache.evict({ id: 'Post:' + post.id });
-			},
-		});
-	}, [post]);
+	const handleDeletePost = React.useCallback(async () => {
+		if (
+			confirm(
+				'Are you sure you want to delete this post? This cannot be undone.'
+			)
+		) {
+			await deletePost({
+				variables: {
+					id: post.id,
+				},
+				update: (cache) => {
+					cache.evict({ id: 'Post:' + post.id });
+					cache.gc();
+				},
+			});
+		}
+	}, [post.id, deletePost]);
 
 	return (
-		<Box key={post.id} p={5} borderRadius={10} shadow='md' borderWidth='1px'>
+		<Box p={5} borderRadius={10} shadow='md' borderWidth='1px'>
 			<Flex>
 				<Vote post={post} />
-				<Stack flex={1} w='100%'>
-					<NextLink href='/post/[id]' as={`/post/${post.id}`}>
-						<Link>
-							<Heading fontSize='xl'>{post.title}</Heading>
-						</Link>
-					</NextLink>
+				<Stack flex={1} w='80%'>
+					{variant === 'preview' ? (
+						<NextLink href='/post/[id]' as={`/post/${post.id}`}>
+							<Link>
+								<Heading fontSize='xl'>
+									{post.title} <ArrowForwardIcon />
+								</Heading>
+							</Link>
+						</NextLink>
+					) : (
+						<Heading fontSize='xl'>{post.title}</Heading>
+					)}
+
 					<Text
 						mt={4}
-						style={{
-							whiteSpace: 'nowrap',
-							overflow: 'hidden',
-							textOverflow: 'ellipsis',
-							width: '85%',
-						}}
+						{...(variant === 'preview'
+							? {
+									whiteSpace: 'nowrap',
+									overflow: 'hidden',
+									textOverflow: 'ellipsis',
+									width: '85%',
+							  }
+							: {})}
 					>
-						<span
-							style={{
-								marginRight: '0.2em',
-							}}
-						>
-							Content:{' '}
-						</span>
-						{post.textSnippet}
-						{post.textSnippet && post.textSnippet?.length < 50 ? '' : '...'}
+						<span style={{ marginRight: '0.2em' }}>Content:</span>
+						{variant === 'preview'
+							? post.textSnippet +
+							  (post.textSnippet && post.textSnippet.length < 50 ? '' : '...')
+							: post.text}
 					</Text>
+
 					<Text mt={4}>
-						<span style={{ marginRight: '0.2em' }}>Likes: </span>
-						{post.points}
+						<span style={{ marginRight: '0.2em' }}>Likes:</span> {post.points}
 					</Text>
+
 					<Text mt={4}>
-						<span style={{ marginRight: '0.2em' }}>Author: </span>
-						{post.creator && capitalizeFirstLetter(post.creator?.username)}
+						<span style={{ marginRight: '0.2em' }}>Author:</span>{' '}
+						{post.creator && capitalizeFirstLetter(post.creator.username)}
 					</Text>
 				</Stack>
-				{userID !== post.creatorId ? null : (
+
+				{userID === post.creatorId && (
 					<NextLink href='/post/edit/[id]' as={`/post/edit/${post.id}`}>
 						<Tooltip fontSize='small' label='Edit post'>
 							<EditIcon
-								boxSize={'21'}
+								boxSize='21'
 								aria-label='Edit post'
 								_hover={{
 									backgroundColor: 'green',
@@ -99,12 +248,13 @@ export function Card(post: CardModel) {
 					</NextLink>
 				)}
 			</Flex>
-			{userID !== post.creatorId ? null : (
-				<Flex justifyContent={'flex-end'}>
+
+			{userID === post.creatorId && (
+				<Flex justifyContent='flex-end'>
 					<Tooltip fontSize='small' label='Delete'>
 						<DeleteIcon
-							color={'#ca244c'}
-							boxSize={'21'}
+							color='#ca244c'
+							boxSize='21'
 							aria-label='Delete Post'
 							_hover={{
 								backgroundColor: '#ca244c',
@@ -112,7 +262,7 @@ export function Card(post: CardModel) {
 								padding: '0.2rem',
 								borderRadius: '0.3rem',
 							}}
-							onClick={deletePost1}
+							onClick={handleDeletePost}
 						/>
 					</Tooltip>
 				</Flex>

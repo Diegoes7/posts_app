@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent } from 'react';
 import { Avatar, Box, Button, Input, Stack, Text } from '@chakra-ui/react';
 
-const AvatarUploader: React.FC = () => {
+const AvatarUploader = () => {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
 

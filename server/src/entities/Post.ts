@@ -44,4 +44,8 @@ export class Post extends BaseEntity {
 	@Field(() => String)
 	@UpdateDateColumn()
 	updatedAt: Date;
+
+	@Field()
+	@Column({ type: 'int', default: 0 })
+	popularityPts!: number;
 }

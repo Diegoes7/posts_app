@@ -9,4 +9,5 @@ fragment Post on Post {
 	text
 	creatorId
 	creator { ...RegularUser}
+	popularityPts
 }

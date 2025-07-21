@@ -1,17 +1,19 @@
 import { User } from '../entities/User'; //* need to be with ../ instead of src/ for some reason ??? 
 import { MyContext } from 'src/types';
-import { Arg, Ctx, Field, FieldResolver, InputType, Mutation, Query, Resolver, Root } from 'type-graphql';
+import { Arg, Ctx, Field, FieldResolver, InputType, Int, Mutation, ObjectType, Query, Resolver, Root, UseMiddleware } from 'type-graphql';
 import argon2 from 'argon2';
 import { UserResponse } from '../entities/util_object_types';
-import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../constants';
+import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../utils/constants';
 import { validateRegister } from '../utils/validateRegister';
-// import { sendEmail } from '../utils/sendGrid_mailer';
 import { v4 } from 'uuid';
-import { AppDataSource } from '../typeorm_config';
+import { AppDataSource } from '../db/typeorm_config';
 import { capitalizeFirstLetter } from '../utils/firstLetterCapitalized';
-import { sendEmailTest } from '../utils/sendMail';
+import { sendPasswordResetEmail } from '../utils/sendMail';
+import { logEvent } from '../kafka/logEvent';
+import { isAuth } from '../middleware/isAuth';
+import { IsEmail, IsOptional, Length } from 'class-validator';
 
-//i use for arguments in the resolvers, when need
+//! use for arguments in the resolvers, when need
 @InputType()
 export class UsernamePasswordInput {
 	@Field()
@@ -22,6 +24,32 @@ export class UsernamePasswordInput {
 
 	@Field()
 	password: string;
+}
+
+@InputType()
+export class UpdateUserInput {
+	@Field({ nullable: true })
+	@IsOptional()
+	@Length(3, 32)
+	username?: string;
+
+	@Field({ nullable: true })
+	@IsOptional()
+	@IsEmail()
+	email?: string;
+
+	@Field(() => Int, { nullable: true })
+	@IsOptional()
+	ratingPts?: number;
+}
+
+@ObjectType()
+class ForgotPasswordResponse {
+	@Field()
+	success: boolean;
+
+	@Field({ nullable: true })
+	previewUrl?: string;
 }
 
 @Resolver(User)
@@ -92,14 +120,30 @@ export class UserResolver {
 		// log in user after change the password
 		req.session.userID = user.id;
 
+		try {
+			await logEvent({
+				event: "user.passwordchanged",
+				actorId: user.id,
+				timestamp: new Date().toISOString(),
+				description: "User change password",
+				payload: {
+					id: user.id,
+					username: user.username,
+					email: user.email,
+				},
+			});
+		} catch (err) {
+			console.error('[logEvent] Failed to log event:', err);
+		}
+
 		return { user };
 	}
 
-	@Mutation(() => Boolean)
+	@Mutation(() => ForgotPasswordResponse)
 	async forgotPassword(
 		@Arg('email') email: string,
 		@Ctx() { redis }: MyContext
-	) {
+	): Promise<ForgotPasswordResponse | Boolean> {
 		const user = await User.findOne({ where: { email } });
 		if (!user) {
 			//* the email is not in the db
@@ -110,8 +154,29 @@ export class UserResolver {
 
 		//! need to setup a real email provider, that's why leave localhost
 		const link = `<a href="http://localhost:3000/change_password/${token}">reset password</a>`;
-		await sendEmailTest(email, link);
-		return true;
+		const rawPreviewUrl = await sendPasswordResetEmail(email, link);
+		const previewUrl = typeof rawPreviewUrl === 'string' ? rawPreviewUrl : undefined;
+
+		try {
+			await logEvent({
+				event: "user.forgotpassword",
+				actorId: user.id,
+				timestamp: new Date().toISOString(),
+				description: "User forgot password and requested reset by email",
+				payload: {
+					id: user.id,
+					username: user.username,
+					email: user.email,
+				},
+			});
+		} catch (err) {
+			console.error('[logEvent] Failed to log event:', err);
+		}
+
+		return {
+			success: true,
+			previewUrl: previewUrl
+		};
 	}
 
 	@Mutation(() => UserResponse)
@@ -128,7 +193,6 @@ export class UserResolver {
 		const hashedPassword = await argon2.hash(options.password);
 		let user;
 		try {
-			// User.create({}).save()
 			const result = await AppDataSource
 				.createQueryBuilder()
 				.insert()
@@ -142,8 +206,30 @@ export class UserResolver {
 				.execute();
 
 			user = result.raw[0];
-			// console.log(user)
-			// return user;
+
+			//$ different approach to log the event
+			// await publishEvent('user.registered-2', {
+			// 	id: user.id,
+			// 	username: user.username,
+			// 	email: user.email,
+			// }, user.id);
+
+			try {
+				await logEvent({
+					event: "user.registered",
+					actorId: user.id,
+					timestamp: new Date().toISOString(),
+					description: "New user registration",
+					payload: {
+						id: user.id,
+						username: user.username,
+						email: user.email,
+					},
+				});
+			} catch (err) {
+				console.error('[logEvent] Failed to log event:', err);
+			}
+
 		} catch (err) {
 			//! duplicate username error
 			if (err.code === '23505') {
@@ -157,8 +243,7 @@ export class UserResolver {
 			console.log('message: ', err.message);
 		}
 
-		//! store user id session, this will set a cookie after register 
-		//! and keep the user logged in
+		//! store user id session, this will set a cookie after register and keep the user logged In
 		req.session.userID = user!.id;
 
 		return { user };
@@ -194,20 +279,138 @@ export class UserResolver {
 		}
 		req.session.userID = user.id;
 
+		try {
+			await logEvent({
+				event: "user.loggedin",
+				actorId: user.id,
+				timestamp: new Date().toISOString(),
+				description: "New user login",
+				payload: {
+					id: user.id,
+					username: user.username,
+					email: user.email,
+				},
+			});
+		} catch (err) {
+			console.error('[logEvent] Failed to log event:', err);
+		}
+
 		return { user };
-	}
+	};
 
 	@Mutation(() => Boolean)
 	async logout(@Ctx() { req, res }: MyContext) {
-		return new Promise(result => req.session.destroy(err => {
-			res.clearCookie(COOKIE_NAME);
-			if (err) {
-				console.log(err);
+		return new Promise(async (result) => {
+			//! Get user ID before destroying session
+			const userId = req.session.userID;
+
+			const user = await User.findOne({ where: { id: userId } });
+			if (!user) {
+				console.warn('User not found during logout:', userId);
 				result(false);
 				return;
 			}
 
-			result(true);
-		}));
+			//* Destroy the session and clear the cookie
+			req.session.destroy(async (err) => {
+				res.clearCookie(COOKIE_NAME);
+				if (err) {
+					console.error('Logout error:', err);
+					result(false);
+					return;
+				}
+
+				if (userId) {
+					try {
+						await logEvent({
+							event: "user.loggedout",
+							actorId: user.id,
+							timestamp: new Date().toISOString(),
+							description: "Auth User logout",
+							payload: {
+								id: user.id,
+								username: user.username,
+								email: user.email,
+							},
+						});
+					} catch (err) {
+						console.error('[logEvent] Failed to log event:', err);
+					}
+				}
+
+				result(true);
+			});
+		});
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(isAuth) // Assumes user is authenticated via session
+	async deleteUser(@Ctx() { req }: MyContext): Promise<boolean> {
+		const userId = req.session.userID;
+
+		const userRepo = AppDataSource.getRepository(User);
+		const user = await userRepo.findOne({ where: { id: userId } });
+
+		if (!user) {
+			throw new Error("User not found");
+		}
+
+		await userRepo.remove(user); // or delete({ id: userId }) if you prefer
+
+		// ✅ Optionally destroy session
+		req.session.destroy((err) => {
+			if (err) console.error("Session destruction failed:", err);
+		});
+
+		// ✅ Log event to DB and Kafka
+		await logEvent({
+			event: "user.deleted",
+			actorId: userId,
+			description: `User ${user.username} deleted their account`,
+			timestamp: new Date().toISOString(),
+			payload: {
+				id: userId,
+				username: user.username,
+				email: user.email,
+			},
+		});
+
+		return true;
+	}
+
+	@Mutation(() => User, { nullable: true })
+	@UseMiddleware(isAuth) // Assumes user is authenticated via session
+	async updateUser(
+		@Arg('data') data: UpdateUserInput,
+		@Ctx() { req }: MyContext
+	): Promise<User | null> {
+		const userId = req.session.userID;
+
+		if (!userId) {
+			throw new Error('Not authenticated');
+		}
+
+		const user = await User.findOne({ where: { id: userId } });
+
+		if (!user) {
+			throw new Error('User not found');
+		}
+
+		Object.assign(user, data);
+		await user.save();
+
+		await logEvent({
+			event: "user.updated",
+			actorId: userId,
+			description: `User ${user.username} change some fields`,
+			timestamp: new Date().toISOString(),
+			payload: {
+				id: userId,
+				username: user.username,
+				email: user.email,
+			},
+		});
+
+		return user;
 	}
 }

@@ -1,6 +1,15 @@
-query Posts($limit: Int!, $cursor: String) {
-	posts(limit: $limit, cursor: $cursor) {
+query Posts($limit: Int!, $cursor: String, $search: String, $creatorId: Int) {
+	posts(limit: $limit, cursor: $cursor, search: $search, creatorId: $creatorId) {
 		hasMore
-		posts {...Post}
+		posts {
+			...Post
+		}
 	}
 }
+
+# query Posts($limit: Int!, $cursor: String) {
+# 	posts(limit: $limit, cursor: $cursor) {
+# 		hasMore
+# 		posts {...Post}
+# 	}
+# }

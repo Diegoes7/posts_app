@@ -17,7 +17,7 @@ type TextareaFieldProps = {
 
 function TextareaField({
 	cols = 10,
-	rows = 7,
+	rows = 15,
 	label,
 	...props
 }: TextareaFieldProps) {

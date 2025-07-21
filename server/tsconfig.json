@@ -26,5 +26,5 @@
 		"typeRoots": ["./node_modules/@types", "./src/types"]
 	},
 	"exclude": ["node_modules"],
-	"include": ["src", "./src/**/*.tsx", "./src/**/*.ts", "mikro-orm.config.ts"]
+	"include": ["src", "./src/**/*.tsx", "./src/**/*.ts", "typeorm_config.ts"]
 }

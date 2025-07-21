@@ -1,0 +1,31 @@
+query AuditLogs {
+  auditLogs {
+    id
+    event
+    description
+    actorId
+    timestamp
+    payload
+  }
+}
+
+
+query AuditLogsByUser($userId: Int!) {
+  auditLogsByUser(userId: $userId) {
+    id
+    event
+    description
+    timestamp
+    payload
+  }
+}
+query AuditLogsByEvent($event: String!) {
+  auditLogsByEvent(event: $event) {
+    id
+    event
+    description
+    actorId
+    timestamp
+    payload
+  }
+}

@@ -7,6 +7,7 @@ import { Box, Button, Spinner } from '@chakra-ui/react';
 import useGetPostFromUrl, { useGetIntID } from '../utils/useGetPostFromUrl';
 import { useUpdatePostMutation } from '../generated/graphql';
 import { useRouter } from 'next/router';
+import { EditIcon } from '@chakra-ui/icons';
 
 export default function EditPost() {
 	const router = useRouter();
@@ -58,6 +59,7 @@ export default function EditPost() {
 							isLoading={isSubmitting}
 							colorScheme='teal'
 							sx={{ alignSelf: 'flex-end' }}
+							leftIcon={<EditIcon />}
 						>
 							Update Post
 						</Button>

@@ -3,7 +3,7 @@ import sgTransport from 'nodemailer-sendgrid-transport';
 
 
 // async..await is not allowed in global scope, must use a wrapper
-export async function sendEmail(to: string, html: string, userEmail: string) {
+export async function sendEmail(to: string, userEmail: string) {
   // Configure SendGrid transport
   const options = {
     auth: {

@@ -64,9 +64,13 @@ const Index = () => {
 				borderBottom='.2em solid black'
 			>
 				<Heading>Posts</Heading>
-				<NextLink href='/create_post'>
+				<NextLink href='/create_post' passHref>
 					<Tooltip fontSize='small' label='Make a new post'>
-						<Button as={ChakraLink} colorScheme='teal' leftIcon={<AddIcon />}>
+						<Button
+							textDecoration={'none'}
+							colorScheme='teal'
+							leftIcon={<AddIcon />}
+						>
 							Create Post
 						</Button>
 					</Tooltip>
@@ -93,7 +97,6 @@ const Index = () => {
 		</Layout>
 	);
 };
-
 
 //* Old way to show posts, new way is through the search panel component
 type RenderPostsProps = {

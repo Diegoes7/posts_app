@@ -29,4 +29,4 @@ createDatabase();
 
 
 //!exporting the current state of your database
-//pg_dump -U postgres -h localhost -p 5432 -d kuejeriets -F p -f db/seed.sql
+//pg_dump -U postgres -h localhost -p 5432 -d kuejeriets -F p -f src/db/seed.sql

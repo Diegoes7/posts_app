@@ -22,12 +22,12 @@ export class User extends BaseEntity {
 	//! no field prop, because NOT return in a mutation, only can set it /can't expose it/ 
 	@Column()
 	password!: string;
-	
+
 	@OneToMany(() => Post, (post) => post.creator)
-	posts: Post[]
+	posts: Post[];
 
 	@OneToMany(() => Updoot, (updoot) => updoot.user)
-	updoots: Updoot[]
+	updoots: Updoot[];
 
 	@Field(() => String)
 	@CreateDateColumn()
@@ -37,7 +37,7 @@ export class User extends BaseEntity {
 	@UpdateDateColumn()
 	updatedAt: Date;
 
-	@Field(() => Int, { nullable: true })
-	@Column({ type: 'integer', default: 0 }) 
-	ratingPts: number
+	@Field(() => Int)
+	@Column({ type: 'integer', default: 0, nullable: false })
+	ratingPts: number;
 }

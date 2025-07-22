@@ -45,7 +45,7 @@ export class Post extends BaseEntity {
 	@UpdateDateColumn()
 	updatedAt: Date;
 
-	@Field()
+	@Field({ nullable: true })
 	@Column({ type: 'int', default: 0 })
-	popularityPts!: number;
+	popularityPts?: number;
 }

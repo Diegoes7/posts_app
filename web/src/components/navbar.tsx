@@ -7,6 +7,7 @@ import { capitalizeFirstLetter } from '../utils/firstLetterCapitalized';
 import { useApolloClient } from '@apollo/client';
 import AuditLogViewer from './audit_log';
 import { AddIcon, LockIcon, UnlockIcon } from '@chakra-ui/icons';
+import { Span } from 'next/dist/trace';
 
 const Navbar = () => {
 	const [imageSrc, setImageSrc] = React.useState<string>('');
@@ -35,7 +36,7 @@ const Navbar = () => {
 			>
 				<NextLink href='/login' passHref>
 					<Tooltip fontSize='small' label='Login to your account'>
-						<Link
+						<Box
 							mr='4'
 							fontSize={16}
 							borderRadius={'.5em'}
@@ -47,12 +48,12 @@ const Navbar = () => {
 						>
 							{<UnlockIcon mr={2} />}
 							Login
-						</Link>
+						</Box>
 					</Tooltip>
 				</NextLink>
 				<NextLink href='/register' passHref>
 					<Tooltip fontSize='small' label='Create a new account'>
-						<Link
+						<Box
 							borderRadius={'.5em'}
 							fontWeight={600}
 							fontSize={16}
@@ -63,7 +64,7 @@ const Navbar = () => {
 						>
 							{<AddIcon mr={2} />}
 							Register
-						</Link>
+						</Box>
 					</Tooltip>
 				</NextLink>
 			</Flex>
@@ -122,19 +123,19 @@ const Navbar = () => {
 			boxShadow='0 2px 8px rgba(0, 0, 0, 0.15)'
 		>
 			<NextLink href={'/'} title='Home' passHref>
-				<Tooltip fontSize='small' label='Go to Home page'>
-					<Link color={'white'} my={2}>
-						<svg
-							xmlns='http://www.w3.org/2000/svg'
-							height='36px'
-							viewBox='0 0 24 24'
-							width='36px'
-							fill='#FFFFFF'
-						>
-							<path d='M0 0h24v24H0V0z' fill='none' />
-							<path d='M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z' />
-						</svg>
-					</Link>
+				<Tooltip fontSize='small' label='Go to Home page' my={2}>
+					{/* <Link color={'white'} my={2}> */}
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						height='36px'
+						viewBox='0 0 24 24'
+						width='36px'
+						fill='#FFFFFF'
+					>
+						<path d='M0 0h24v24H0V0z' fill='none' />
+						<path d='M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z' />
+					</svg>
+					{/* </Link> */}
 				</Tooltip>
 			</NextLink>
 			<Box ml='auto' mr='4'>

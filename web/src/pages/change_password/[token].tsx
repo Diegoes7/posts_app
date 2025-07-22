@@ -69,7 +69,7 @@ const ChangePassword = () => {
 									<Box mr='2' color='red'>
 										{tokenError}
 									</Box>
-									<NextLink href='/forgot_password'>
+									<NextLink href='/forgot_password' passHref>
 										<Link> Go get a new token</Link>
 									</NextLink>
 								</Flex>

@@ -14,9 +14,10 @@ export const AppDataSource = new DataSource({
   // password: process.env.POSTGRES_PASSWORD?.toString(),
   // database: process.env.POSTGRES_DB,
   // entities: [Post, User, Updoot],
-  // synchronize: true,
+  // synchronize: false,
   // logging: false,
 
+  //! localhost setup
   type: "postgres",
   host: "localhost", // must match docker-compose service name
   port: 5432,
@@ -31,6 +32,6 @@ export const AppDataSource = new DataSource({
 
 
 ////////////////$ create a migration file ////////////
-//! npx typeorm migration:generate dist/migrations/CreateAuditLogTable -d dist/typeorm_config.js
-//? npx typeorm-ts-node-commonjs migration:generate src/migrations/CreateAuditLogTable -d src/db/typeorm_config.ts 
+//! npx typeorm migration:generate dist/migrations/CreateAuditLogTable -d dist/db/typeorm_config.js
+//? npx typeorm-ts-node-commonjs migration:generate src/migrations/CreateAuditLogTable -d src/db/typeorm_config.ts
 //& npx typeorm migration:run -d dist/typeorm_config.js // migration in production, after compile

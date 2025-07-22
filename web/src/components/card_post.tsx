@@ -26,7 +26,7 @@ type PostCardProps = {
 		title: string;
 		updatedAt: string;
 		voteStatus?: number | null;
-		popularityPts: number;
+		popularityPts?: number | null;
 	};
 	variant?: 'preview' | 'full';
 };

@@ -88,7 +88,7 @@ const Index = () => {
 			{data && data.posts.hasMore ? (
 				<Flex justifyContent='flex-end'>
 					<Tooltip fontSize='small' label='Get more posts'>
-						<Button onClick={handlePagination} isLoading={loading} mb='6'>
+						<Button onClick={handlePagination} isLoading={loading} my='6'>
 							Load more...
 						</Button>
 					</Tooltip>

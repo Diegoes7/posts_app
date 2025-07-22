@@ -30,6 +30,7 @@ async function sendEmailTest(to: string, html: string) {
     return previewUrl;
   } catch (err) {
     console.error("Email send error:", err);
+    throw Error(`Mail error', ${err.message}`);
   }
 }
 

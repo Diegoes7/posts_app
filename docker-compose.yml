@@ -28,8 +28,8 @@ services:
       - POSTGRES_HOST=postgres
       - POSTGRES_DB=posts_db
     volumes:
-      - pgdata:/var/lib/postgresql/data  
-      - ./server/src/db/seed.sql:/docker-entrypoint-initdb.d/seed.sql  # Uncomment to seed the database on startup
+      - pgdata:/var/lib/postgresql/data
+      - ./server/src/db/seed.sql:/docker-entrypoint-initdb.d/seed.sql # Uncomment to seed the database on startup
 
   server:
     build:
@@ -51,7 +51,8 @@ services:
       - REDIS_URL=redis://redis:6379
       - KAFKA_BROKER=kafka:29092
     volumes:
-      - ./server:/app
+      []
+      # - ./server:/app
     working_dir: /app
     command: npm run dev
 
@@ -70,7 +71,7 @@ services:
       - ALLOW_ANONYMOUS_LOGIN=yes
 
   kafka:
-    image: bitnami/kafka:3.6.1  # ✅ explicitly use pre-KRaft version
+    image: bitnami/kafka:3.6.1 # ✅ explicitly use pre-KRaft version
     container_name: kafka
     ports:
       - '9092:9092'

@@ -60,115 +60,128 @@ const UpdateUser = () => {
 
 	return (
 		<Layout variant='small'>
-				<Box mb={6}>
-					<Heading size='lg'>Update User</Heading>
-					<Divider borderColor='gray.600' />
-				</Box>
-				<Formik
-					initialValues={{
-						username: data.me.username,
-						email: data.me.email,
-						updatedAt: formattedUpdatedAt || '',
-					}}
-					onSubmit={async (values, { setErrors }) => {
-						try {
-							const response = await updateUser({
-								variables: {
-									data: {
-										username: values.username,
-										email: values.email,
-										// updatedAt should NOT be sent to mutation because it's read-only server-side
-									},
+			<Box mb={6}>
+				<Heading size='lg'>Update User</Heading>
+				<Divider borderColor='gray.600' />
+			</Box>
+			<Formik
+				initialValues={{
+					username: data.me.username,
+					email: data.me.email,
+					updatedAt: formattedUpdatedAt || '',
+					ratingPts: data.me.ratingPts,
+				}}
+				onSubmit={async (values, { setErrors }) => {
+					try {
+						const response = await updateUser({
+							variables: {
+								data: {
+									username: values.username,
+									email: values.email,
+									ratingPts: values.ratingPts,
+									// updatedAt should NOT be sent to mutation because it's read-only server-side
 								},
-								update: (cache, { data }) => {
-									if (data?.updateUser) {
-										cache.writeQuery<MeQuery>({
-											query: MeDocument,
-											data: {
-												__typename: 'Query',
-												me: data.updateUser as any, // update cache with new user data
-											},
-										});
-									}
-								},
-							});
+							},
+							update: (cache, { data }) => {
+								if (data?.updateUser) {
+									cache.writeQuery<MeQuery>({
+										query: MeDocument,
+										data: {
+											__typename: 'Query',
+											me: data.updateUser as any, // update cache with new user data
+										},
+									});
+								}
+							},
+						});
 
-							if (!response.data?.updateUser) {
-								setErrors({ username: 'Update failed' }); // basic error feedback
-							} else {
-								router.push('/'); // redirect to home or profile page on success
-							}
-						} catch (err) {
-							setErrors({ username: 'Server error occurred' }); // or parse detailed errors
+						if (!response.data?.updateUser) {
+							setErrors({ username: 'Update failed' }); // basic error feedback
+						} else {
+							router.push('/'); // redirect to home or profile page on success
 						}
-					}}
-				>
-					{({ isSubmitting, handleChange, values }) => (
-						<Form style={{ display: 'flex', flexDirection: 'column' }}>
+					} catch (err) {
+						setErrors({ username: 'Server error occurred' }); // or parse detailed errors
+					}
+				}}
+			>
+				{({ isSubmitting, handleChange, values }) => (
+					<Form style={{ display: 'flex', flexDirection: 'column' }}>
+						<InputField
+							label='Username'
+							name='username'
+							placeholder='Username'
+							value={values.username}
+							onChange={handleChange}
+						/>
+						<Box mt={8}>
 							<InputField
-								label='Username'
-								name='username'
-								placeholder='Username'
-								value={values.username}
+								label='Email'
+								name='email'
+								placeholder='Email'
+								type='email'
+								value={values.email}
 								onChange={handleChange}
 							/>
-							<Box mt={8}>
-								<InputField
-									label='Email'
-									name='email'
-									placeholder='Email'
-									type='email'
-									value={values.email}
-									onChange={handleChange}
-								/>
-							</Box>
-							<Box mt={8}>
-								<InputField
-									label='Last Updated'
-									name='updatedAt'
-									placeholder='Last Updated'
-									type='text'
-									value={values.updatedAt}
-									// isReadOnly
-								/>
-							</Box>
-							<Button
-								mt={10}
-								type='submit'
-								isLoading={isSubmitting || updating}
-								colorScheme='teal'
-								sx={{ alignSelf: 'flex-end' }}
-								leftIcon={<EditIcon />}
-							>
-								Update
-							</Button>
-						</Form>
-					)}
-				</Formik>
-				<Button
-					mt={6}
-					colorScheme='red'
-					bg='red.700'
-					_hover={{ bg: 'red.800' }}
-					_active={{ bg: 'red.900' }}
-					color='white'
-					variant='solid'
-					onClick={async () => {
-						if (
-							confirm(
-								'Are you sure you want to delete your account? This cannot be undone.'
-							)
-						) {
-							const response = await deleteUser();
-							if (response.data?.deleteUser) {
-								router.push('/');
-							}
+						</Box>
+						<Box mt={8}>
+							<InputField
+								label='Last Updated'
+								name='updatedAt'
+								placeholder='Last Updated'
+								type='text'
+								value={values.updatedAt}
+								// isReadOnly
+							/>
+						</Box>
+						<Box mt={8}>
+							<InputField
+								label='Rating Points'
+								name='updatedAt'
+								placeholder='Last Updated'
+								type='text'
+								value={values.ratingPts + ''}
+								// readOnly
+								disabled
+							/>
+						</Box>
+						<Button
+							mt={10}
+							type='submit'
+							isLoading={isSubmitting || updating}
+							colorScheme='teal'
+							sx={{ alignSelf: 'flex-end' }}
+							leftIcon={<EditIcon />}
+						>
+							Update
+						</Button>
+					</Form>
+				)}
+			</Formik>
+			<Button
+				mt={6}
+				colorScheme='red'
+				bg='red.700'
+				_hover={{ bg: 'red.800' }}
+				_active={{ bg: 'red.900' }}
+				color='white'
+				variant='solid'
+				onClick={async () => {
+					if (
+						confirm(
+							'Are you sure you want to delete your account? This cannot be undone.'
+						)
+					) {
+						const response = await deleteUser();
+						if (response.data?.deleteUser) {
+							router.push('/');
 						}
-					}}
-					leftIcon={<DeleteIcon />}
-				>
-					Delete Account
-				</Button>
+					}
+				}}
+				leftIcon={<DeleteIcon />}
+			>
+				Delete Account
+			</Button>
 		</Layout>
 	);
 };

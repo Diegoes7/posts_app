@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from 'type-graphql';
+import { Field, ObjectType } from 'type-graphql';
 import { BaseEntity, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Post } from './Post';
 import { Updoot } from './Updoot';
@@ -37,7 +37,7 @@ export class User extends BaseEntity {
 	@UpdateDateColumn()
 	updatedAt: Date;
 
-	@Field(() => Int)
+	@Field({ nullable: true })
 	@Column({ type: 'integer', default: 0, nullable: false })
 	ratingPts: number;
 }

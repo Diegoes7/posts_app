@@ -119,7 +119,7 @@ export type Post = {
   creatorId: Scalars['Float']['output'];
   id: Scalars['Float']['output'];
   points: Scalars['Float']['output'];
-  popularityPts: Scalars['Float']['output'];
+  popularityPts?: Maybe<Scalars['Float']['output']>;
   text: Scalars['String']['output'];
   textSnippet?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
@@ -176,7 +176,7 @@ export type User = {
   createdAt: Scalars['String']['output'];
   email: Scalars['String']['output'];
   id: Scalars['Float']['output'];
-  ratingPts?: Maybe<Scalars['Int']['output']>;
+  ratingPts?: Maybe<Scalars['Float']['output']>;
   updatedAt: Scalars['String']['output'];
   username: Scalars['String']['output'];
 };
@@ -193,13 +193,13 @@ export type UsernamePasswordInput = {
   username: Scalars['String']['input'];
 };
 
-export type PostFragment = { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null };
+export type PostFragment = { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts?: number | null, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null } | null };
 
 export type RegularErrorFragment = { __typename?: 'FieldError', field: string, message: string };
 
-export type RegularUserFragment = { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string };
+export type RegularUserFragment = { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null };
 
-export type RegularUserResponseFragment = { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null };
+export type RegularUserResponseFragment = { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null } | null };
 
 export type ChangePasswordMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -207,14 +207,14 @@ export type ChangePasswordMutationVariables = Exact<{
 }>;
 
 
-export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } };
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null } | null } };
 
 export type CreatePostMutationVariables = Exact<{
   input: PostInput;
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts?: number | null, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null } | null } };
 
 export type DeletePostMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -236,7 +236,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null } | null } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -248,7 +248,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null } | null } };
 
 export type UpdatePostMutationVariables = Exact<{
   id: Scalars['Int']['input'];
@@ -257,7 +257,7 @@ export type UpdatePostMutationVariables = Exact<{
 }>;
 
 
-export type UpdatePostMutation = { __typename?: 'Mutation', updatePost?: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } | null };
+export type UpdatePostMutation = { __typename?: 'Mutation', updatePost?: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts?: number | null, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null } | null } | null };
 
 export type DeleteUserMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -269,7 +269,7 @@ export type UpdateUserMutationVariables = Exact<{
 }>;
 
 
-export type UpdateUserMutation = { __typename?: 'Mutation', updateUser?: { __typename?: 'User', id: number, username: string, email: string, updatedAt: string } | null };
+export type UpdateUserMutation = { __typename?: 'Mutation', updateUser?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null } | null };
 
 export type VoteMutationVariables = Exact<{
   value: Scalars['Int']['input'];
@@ -301,14 +301,14 @@ export type AuditLogsByEventQuery = { __typename?: 'Query', auditLogsByEvent: Ar
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null } | null };
 
 export type PostQueryVariables = Exact<{
   id: Scalars['Int']['input'];
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null } | null };
+export type PostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts?: number | null, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null } | null } | null };
 
 export type PostsQueryVariables = Exact<{
   limit: Scalars['Int']['input'];
@@ -318,7 +318,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts: number, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string } | null }> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, points: number, textSnippet?: string | null, voteStatus?: number | null, text: string, creatorId: number, popularityPts?: number | null, creator?: { __typename?: 'User', id: number, username: string, email: string, createdAt: string, updatedAt: string, ratingPts?: number | null } | null }> } };
 
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
@@ -327,6 +327,7 @@ export const RegularUserFragmentDoc = gql`
   email
   createdAt
   updatedAt
+  ratingPts
 }
     `;
 export const PostFragmentDoc = gql`
@@ -660,13 +661,10 @@ export type DeleteUserMutationOptions = Apollo.BaseMutationOptions<DeleteUserMut
 export const UpdateUserDocument = gql`
     mutation UpdateUser($data: UpdateUserInput!) {
   updateUser(data: $data) {
-    id
-    username
-    email
-    updatedAt
+    ...RegularUser
   }
 }
-    `;
+    ${RegularUserFragmentDoc}`;
 export type UpdateUserMutationFn = Apollo.MutationFunction<UpdateUserMutation, UpdateUserMutationVariables>;
 
 /**

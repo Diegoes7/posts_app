@@ -161,10 +161,11 @@ export default function AuditLogViewer({ user }: AuditLogViewerProps) {
 									<option value='post.updated'>Updated Posts</option>
 									<option value='post.deleted'>Deleted Posts</option>
 									<option value='user.loggedin'>Logged In User</option>
+									<option value='user.deleted'>User Deleted</option>
 									<option value='user.loggedout'>Logged Out User</option>
 									<option value='user.registered'>Registered User</option>
-									<option value='user.post-bonus'>Post bonus pts</option>
-									<option value='user.bonus-awarded'>User bonus pts</option>
+									<option value='user.post-bonus'>Post Bonus Pts</option>
+									<option value='user.bonus-awarded'>User Bonus Pts</option>
 								</Select>
 							</HStack>
 						</Box>

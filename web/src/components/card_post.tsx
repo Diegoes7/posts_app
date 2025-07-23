@@ -43,11 +43,24 @@ export function Card({ post, variant = 'preview' }: PostCardProps) {
 			)
 		) {
 			await deletePost({
-				variables: {
-					id: post.id,
-				},
+				variables: { id: post.id },
 				update: (cache) => {
-					cache.evict({ id: 'Post:' + post.id });
+					// Remove from cache by ID (if normalized)
+					cache.evict({ id: `Post:${post.id}` });
+
+					// Also remove it from the posts list
+					cache.modify({
+						fields: {
+							posts(existing: any) {
+								if (!existing || !existing.posts) return;
+								return {
+									...existing,
+									posts: existing.posts.filter((p: any) => p.id !== post.id),
+								};
+							},
+						},
+					});
+
 					cache.gc();
 				},
 			});

@@ -97,5 +97,11 @@ export const runUserVoted = () => {
   });
 };
 
+export const runUserDeleted = () => {
+  return createConsumer('user.deleted', 'user.deleted-group', async (event) => {
+    console.log(`✅ User delete itself: ${event.payload.title}`, event.payload);
+  });
+};
+
 //! can make a generic consumer for query to show how many people see it,
 //! i will just keep track how may queries is included/  get a single post /

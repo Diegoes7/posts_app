@@ -1,4 +1,4 @@
-import { runPostCreate, runPostDelete, runPostRead, runPostUpdate, runUserForgotPassword, runUserLogin, runUserLogout, runUserPasswordChanged, runUserRegister, runUserUpdated, runUserVoted } from './generic_consumer';
+import { runPostCreate, runPostDelete, runPostRead, runPostUpdate, runUserDeleted, runUserForgotPassword, runUserLogin, runUserLogout, runUserPasswordChanged, runUserRegister, runUserUpdated, runUserVoted } from './generic_consumer';
 import { runPostCreatedBonusConsumer, runUserGiftBonusConsumer } from './runBonusPoints';
 
 export const runKafkaConsumers = async () => {
@@ -10,6 +10,7 @@ export const runKafkaConsumers = async () => {
 			runUserPasswordChanged(),
 			runUserForgotPassword(),
 			runUserUpdated(),
+			runUserDeleted(),
 
 			runUserGiftBonusConsumer(),
 			runPostCreatedBonusConsumer(),

@@ -22,11 +22,22 @@ function CreatePost() {
 				initialValues={{ title: '', text: '' }}
 				onSubmit={async (values) => {
 					const response = await createPost({
-						variables: {
-							input: values,
-						},
-						update: (cache) => {
-							cache.evict({ fieldName: 'posts:{}' });
+						variables: { input: values },
+						update: (cache, { data }) => {
+							if (!data?.createPost) return;
+
+							cache.modify({
+								fields: {
+									posts(existing) {
+										if (!existing || !existing.posts) return;
+
+										return {
+											...existing,
+											posts: [data.createPost, ...existing.posts],
+										};
+									},
+								},
+							});
 						},
 					});
 					if (!response.errors) {

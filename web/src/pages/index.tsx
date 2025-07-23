@@ -31,7 +31,7 @@ const Index = () => {
 		notifyOnNetworkStatusChange: true, // loading actually seen, this tell loading is true
 	});
 
-	const userID = user?.me?.id;
+	// const userID = user?.me?.id;
 
 	if (!loading && !data) {
 		return (

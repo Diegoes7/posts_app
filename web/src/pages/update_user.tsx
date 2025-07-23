@@ -14,19 +14,39 @@ import { useRouter } from 'next/router';
 import { withApollo } from '../utils/withApollo';
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import Layout from '../components/Layout';
+import { useApolloClient } from '@apollo/client';
 
 const UpdateUser = () => {
 	const router = useRouter();
-
-	// Fetch current user data
+	const client = useApolloClient();
 	const { data, loading, error } = useMeQuery();
 
 	const [updateUser, { loading: updating }] = useUpdateUserMutation();
 	const [deleteUser] = useDeleteUserMutation();
 
+	const handleDelete = React.useCallback(async () => {
+		if (
+			confirm(
+				'Are you sure you want to delete your account? This cannot be undone.'
+			)
+		) {
+			try {
+				const response = await deleteUser();
+				if (response.data?.deleteUser) {
+					// Clear Apollo Client cache to remove all user-related data
+					await client.clearStore();
+					// Redirect to home or login page
+					router.push('/');
+				}
+			} catch (error) {
+				console.error('Account deletion failed:', error);
+			}
+		}
+	}, [deleteUser, client, router]);
+
 	React.useEffect(() => {
 		if (!loading && !data?.me) {
-			router.replace('/'); // redirect to home if not authenticated
+			router.replace('/'); 
 		}
 	}, [loading, data, router]);
 
@@ -166,18 +186,7 @@ const UpdateUser = () => {
 				_active={{ bg: 'red.900' }}
 				color='white'
 				variant='solid'
-				onClick={async () => {
-					if (
-						confirm(
-							'Are you sure you want to delete your account? This cannot be undone.'
-						)
-					) {
-						const response = await deleteUser();
-						if (response.data?.deleteUser) {
-							router.push('/');
-						}
-					}
-				}}
+				onClick={handleDelete}
 				leftIcon={<DeleteIcon />}
 			>
 				Delete Account

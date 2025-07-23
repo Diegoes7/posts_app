@@ -23,7 +23,7 @@ export const AppDataSource = new DataSource({
   // port: 5432,
   // username: "postgres",
   // password: "victoria7",
-  // database: "posts_db",
+  // // database: "posts_db",
   // entities: [Post, User, Updoot, AuditLog],
   // synchronize: true,
   // logging: true,
@@ -35,3 +35,6 @@ export const AppDataSource = new DataSource({
 //! npx typeorm migration:generate dist/migrations/CreateAuditLogTable -d dist/db/typeorm_config.js
 //? npx typeorm-ts-node-commonjs migration:generate src/migrations/CreateAuditLogTable -d src/db/typeorm_config.ts
 //& npx typeorm migration:run -d dist/typeorm_config.js // migration in production, after compile
+
+//$ transfer the local data to container
+// pg_dump -U postgres -h localhost -p 5432 -d postgres -F p -f src/db/seed.sql

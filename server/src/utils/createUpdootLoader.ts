@@ -6,7 +6,7 @@ export const createUpdootLoader = () =>
   new DataLoader<{ postId: number; userId: number; }, Updoot | null>(async (keys) => {
     const updoots = await Updoot.createQueryBuilder("updoot")
       .where(
-        keys.map((key, index) =>
+        keys.map((_, index) =>
           `(updoot."postId" = :postId${index} AND updoot."userId" = :userId${index})`
         ).join(" OR "),
         Object.fromEntries(

@@ -1,14 +1,11 @@
 import {
 	Post,
-	// PostsQuery,
-	useMeQuery,
 	usePostsQuery,
 } from '../generated/graphql';
 import Layout from '../components/Layout';
 import NextLink from 'next/link';
 import {
 	Flex,
-	Link as ChakraLink,
 	Stack,
 	Heading,
 	Button,
@@ -22,7 +19,7 @@ import { AddIcon } from '@chakra-ui/icons';
 import { PostSearchPanel } from '../components/search_panel';
 
 const Index = () => {
-	const { data: user } = useMeQuery();
+	// const { data: user } = useMeQuery();
 	const { data, error, loading, fetchMore, variables } = usePostsQuery({
 		variables: {
 			limit: 10,

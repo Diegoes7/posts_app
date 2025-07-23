@@ -1,5 +1,5 @@
 import { TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
-import { Flex, Spinner } from '@chakra-ui/react';
+import { Flex, Spinner, useToast } from '@chakra-ui/react';
 import React from 'react';
 import {
 	PostFragment,
@@ -72,6 +72,7 @@ export function Vote({ post }: VoteProps) {
 	>('not-loading');
 
 	const [vote] = useVoteMutation();
+	const toast = useToast();
 
 	const handleVote = async (value: 1 | -1) => {
 		const voteType = value === 1 ? 'upvote-loading' : 'downvote-loading';
@@ -85,6 +86,13 @@ export function Vote({ post }: VoteProps) {
 				update: (cache) => updateAfterVote(value, post.id, cache),
 			});
 		} catch (error) {
+			toast({
+				title: 'No Authenticated user.',
+				description: 'Need to be logged in to vote.',
+				status: 'warning',
+				duration: 3000,
+				isClosable: true,
+			});
 			console.error('Vote error:', error);
 		}
 		setLoadingState('not-loading');

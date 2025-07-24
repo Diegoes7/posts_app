@@ -34,4 +34,3 @@ function Wrapper({ children, variant = 'regular' }: WrapperProps) {
 }
 
 export default Wrapper;
-
